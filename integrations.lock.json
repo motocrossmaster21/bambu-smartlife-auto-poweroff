@@ -1,0 +1,16 @@
+[
+  {
+    "domain": "bambu_lab",
+    "version": "v2.2.26",
+    "url": "https://github.com/greghesp/ha-bambulab/releases/download/v2.2.26/bambu_lab.zip",
+    "sha256": "fc72606c55f76e5d0401b98723fe67a637faf01cdc16494572bcc228ca83cdcd",
+    "prefix": ""
+  },
+  {
+    "domain": "tuya_cloud_ha_bridge",
+    "version": "v1.1.2",
+    "url": "https://codeload.github.com/tuya/tuya_cloud_ha_bridge/zip/c1c6f3c358cd1f9ebae0a7ebbad2294076535b9d",
+    "sha256": "db923e18a9803f540dbc340fe8c1bfe838f58850b269ae1ec3c92486862f4071",
+    "prefix": "tuya_cloud_ha_bridge-c1c6f3c358cd1f9ebae0a7ebbad2294076535b9d/custom_components/tuya_cloud_ha_bridge/"
+  }
+]

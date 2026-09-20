@@ -1,0 +1,14 @@
+homeassistant:
+  name: Bambu Power Control
+  time_zone: !env_var TZ Europe/Zurich
+  unit_system: metric
+default_config:
+input_boolean: !include helpers.yaml
+automation manual: !include automations-managed.yaml
+# UI-created automations go into the ignored runtime directory.
+automation: !include automations.yaml
+p1s_guard: !include guard.yaml
+logger:
+  default: warning
+  logs:
+    custom_components.p1s_guard: info

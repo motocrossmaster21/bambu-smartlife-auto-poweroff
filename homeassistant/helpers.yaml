@@ -1,0 +1,12 @@
+bambu_auto_power_off:
+  name: Bambu Auto Power Off
+  icon: mdi:power-sleep
+  # Omit initial: restore the user's one-shot intent across HA restarts.
+p1s_power_off_fault:
+  name: P1S Power Off Fault
+  icon: mdi:alert
+  # Restored after restart; requires explicit acknowledgement after a failure.
+p1s_power_off_notifications:
+  name: P1S Power Off Notifications
+  initial: false
+  icon: mdi:bell

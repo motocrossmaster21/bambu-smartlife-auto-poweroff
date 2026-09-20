@@ -1,0 +1,10 @@
+{
+  "domain": "p1s_guard",
+  "name": "P1S Power Guard",
+  "version": "1.0.0",
+  "config_flow": true,
+  "documentation": "https://github.com/motocrossmaster21/bambu-smartlife-auto-poweroff",
+  "codeowners": ["@motocrossmaster21"],
+  "dependencies": ["input_boolean"],
+  "iot_class": "local_push"
+}

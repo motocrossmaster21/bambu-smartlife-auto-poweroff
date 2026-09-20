@@ -1,0 +1,6 @@
+power_off:
+  name: Safely turn off P1S
+  description: Requires fresh safe conditions for the full stability interval. Confirms OFF before resetting.
+acknowledge_fault:
+  name: Acknowledge P1S power-off fault
+  description: Inspect the plug and turn off Bambu Auto Power Off first. Clears the persistent retry lock.

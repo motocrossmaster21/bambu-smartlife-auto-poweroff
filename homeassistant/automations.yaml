@@ -1,0 +1,10 @@
+- id: p1s_auto_power_off
+  alias: P1S Auto Power Off
+  description: The guarded service rechecks live data immediately before dispatch.
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.p1s_safe_power_off
+      to: "on"
+  actions:
+    - action: p1s_guard.power_off

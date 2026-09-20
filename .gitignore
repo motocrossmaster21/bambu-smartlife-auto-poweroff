@@ -203,6 +203,21 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# Home Assistant runtime, credentials and backups (public repository)
+runtime/
+.env.*
+!.env.example
+secrets.yaml
+*.db
+*.db-*
+*.sqlite*
+.storage/
+*.backup
+*.tar
+*.tar.gz
+*.zip
+homeassistant/config/
+
 # Ruff stuff:
 .ruff_cache/
 
