@@ -1,0 +1,7 @@
+**
+!Dockerfile
+!requirements.txt
+!bambuoff/
+!bambuoff/**
+bambuoff/**/__pycache__/
+bambuoff/**/*.pyc

@@ -1,0 +1,37 @@
+name: bambu-auto-poweroff
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: unless-stopped
+    stop_grace_period: 60s
+    environment:
+      TZ: ${TZ:-Europe/Zurich}
+      P1S_STATUS_ENTITY: ${P1S_STATUS_ENTITY:-sensor.replace_with_p1s_print_status}
+      P1S_NOZZLE_ENTITY: ${P1S_NOZZLE_ENTITY:-sensor.replace_with_p1s_nozzle_temperature}
+      P1S_NOZZLE_TARGET_ENTITY: ${P1S_NOZZLE_TARGET_ENTITY:-sensor.replace_with_p1s_nozzle_target}
+      P1S_BED_ENTITY: ${P1S_BED_ENTITY:-sensor.replace_with_p1s_bed_temperature}
+      P1S_BED_TARGET_ENTITY: ${P1S_BED_TARGET_ENTITY:-sensor.replace_with_p1s_bed_target}
+      P1S_PROGRESS_ENTITY: ${P1S_PROGRESS_ENTITY:-sensor.replace_with_p1s_print_progress}
+      P1S_ONLINE_ENTITY: ${P1S_ONLINE_ENTITY:-binary_sensor.replace_with_p1s_online}
+      P1S_PLUG_ENTITY: ${P1S_PLUG_ENTITY:-switch.replace_with_p1s_power_plug}
+      TUYA_BRIDGE_ENTRY_ID: ${TUYA_BRIDGE_ENTRY_ID:-replace_with_bridge_config_entry_id}
+      SAFE_NOZZLE_TEMPERATURE: ${SAFE_NOZZLE_TEMPERATURE:-50}
+      STABLE_SECONDS: ${STABLE_SECONDS:-30}
+      MAX_DATA_AGE_SECONDS: ${MAX_DATA_AGE_SECONDS:-60}
+      POWER_OFF_TIMEOUT_SECONDS: ${POWER_OFF_TIMEOUT_SECONDS:-20}
+    ports:
+      - "${HA_BIND_IP:-127.0.0.1}:8123:8123"
+    volumes:
+      - ${HA_CONFIG_DIR:-./runtime/homeassistant}:/config
+      - ./homeassistant/configuration.yaml:/config/configuration.yaml:ro
+      - ./homeassistant/helpers.yaml:/config/helpers.yaml:ro
+      - ./homeassistant/automations.yaml:/config/automations-managed.yaml:ro
+      - ./homeassistant/guard.yaml:/config/guard.yaml:ro
+      - ./homeassistant/custom_components/p1s_guard:/config/custom_components/p1s_guard:ro
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
