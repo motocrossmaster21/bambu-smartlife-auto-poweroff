@@ -1,5 +1,6 @@
 """Observe the running demo: 30-second gate, signal and return to false."""
 import json
+import http.client
 import time
 import urllib.error
 import urllib.request
@@ -12,11 +13,15 @@ def check(url="http://127.0.0.1:8080", timeout=180):
     true_since = None
     measured_full_pulse = False
     previous_value = None
+    last_transport_error = None
     while time.monotonic() < deadline:
         try:
             with urllib.request.urlopen(url + "/status", timeout=2) as response:
                 data = json.load(response)
-        except (urllib.error.URLError, TimeoutError):
+        except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException) as exc:
+            last_transport_error = type(exc).__name__
+            # A missing observation must not count towards a continuous pulse.
+            previous_value, true_since = None, None
             time.sleep(0.5)
             continue
         assert data["mode"] == "demo", "Smoke check must never run against live mode"
@@ -37,7 +42,9 @@ def check(url="http://127.0.0.1:8080", timeout=180):
             return
         previous_value = data["bambu_off"]
         time.sleep(0.5)
-    raise AssertionError("Complete demo cycle not observed in time")
+    raise AssertionError(
+        f"Complete demo cycle not observed in {timeout}s; "
+        f"observed phases: {sorted(phases)}; last transport error: {last_transport_error}")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ Das Home-Assistant-Archiv wird nicht gestartet oder in das Image eingebaut.
 
 ## Automatisierte Prüfungen
 
-Lokal am 27.09.2026: 45 Tests bestanden, Compose validiert und Docker-Image
+Lokal am 27.09.2026: 49 Tests bestanden, Compose validiert und Docker-Image
 erfolgreich gebaut. Der Demo-Container startet ohne Zugangsdaten und meldet
 einen gesunden Zustand. Der HTTP-Smoke-Test ist ebenfalls bestanden: 30 Sekunden
 Stabilisierung, etwa 30 Sekunden EIN und automatisches AUS bei weiterem FINISH.
@@ -32,6 +32,9 @@ MQTT-Schnittstellen. Abgedeckt sind insbesondere:
 - Initiales Tuya-AUS muss bestätigt sein; falsche/fehlgeschlagene Bestätigungen.
 - Keine Bambu-Publishes, keine Steckdosensteuerung und kein Replay alter Publishes.
 - ENV-Validierung und Ausschluss von Secrets aus dem Docker-Build-Kontext.
+- HTTP-Verbindungsreset beim Start wird erneut versucht; dauerhafte Fehler
+  führen weiterhin zum Timeout. Eine unterbrochene Impulsbeobachtung zählt
+  nicht als vollständig beobachteter Impuls; Live-Modus wird sofort abgewiesen.
 
 ```powershell
 python -m pip install -r requirements-test.txt
@@ -45,6 +48,12 @@ Der Smoke-Test beobachtet über HTTP einen vollständigen Demo-Impuls. Er prüft
 mindestens 30 Sekunden Stabilisierung, ungefähr 30 Sekunden EIN und den Reset
 bei **weiterhin FINISH**, noch bevor der nächste simulierte Druck beginnt.
 Es werden keine Cloud-Verbindungen hergestellt.
+
+GitHub Actions wartet vor dem Smoke-Test mit `--wait --wait-timeout 90` auf
+den gesunden Container. Der Test versucht vorübergehend fehlgeschlagene
+HTTP-Verbindungen innerhalb seines 180-Sekunden-Limits erneut. Bei Fehlern
+gibt der Workflow Containerstatus und Logs aus. Der Runner ist auf Ubuntu 24.04
+festgelegt; Checkout und Python-Setup verwenden Actions mit Node.js 24.
 
 ## Noch erforderliche Live-Abnahme
 

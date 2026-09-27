@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 name: bambuoff
 services:
   bambuoff:
@@ -14,7 +15,7 @@ services:
       TUYA_DEVICE_SECRET: ${TUYA_DEVICE_SECRET:-}
       TUYA_MQTT_HOST: ${TUYA_MQTT_HOST:-m1.tuyaeu.com}
       TUYA_PROPERTY_CODE: ${TUYA_PROPERTY_CODE:-bambu_off}
-      SAFE_NOZZLE_TEMPERATURE: ${SAFE_NOZZLE_TEMPERATURE:-50}
+      SAFE_NOZZLE_TEMPERATURE: ${SAFE_NOZZLE_TEMPERATURE:-30}
       STABLE_SECONDS: ${STABLE_SECONDS:-30}
       PULSE_SECONDS: ${PULSE_SECONDS:-30}
       MAX_DATA_AGE_SECONDS: ${MAX_DATA_AGE_SECONDS:-60}
