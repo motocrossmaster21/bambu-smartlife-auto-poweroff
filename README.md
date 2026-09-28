@@ -209,8 +209,23 @@ Compose-Build-Unterstützung beziehungsweise Docker Compose v2 verwenden:
 docker compose up -d --build
 ```
 
+Nach Änderungen an Code oder Konfiguration das Image neu bauen und den Container
+explizit neu erstellen:
+
+```sh
+docker compose up -d --build --force-recreate
+```
+
 `BIND_IP` bei Bedarf auf die LAN-IP des NAS setzen. Keine WAN-Portfreigabe nötig.
 Docker legt ein eigenes benanntes Volume für die kleine Zustandsdatei an.
+Der Container ist auf 128 MiB RAM (ohne zusätzlichen Swap), 0,5 CPU-Kerne
+und 64 Prozesse/Threads begrenzt. Die Statusseite verarbeitet höchstens acht
+Verbindungen gleichzeitig; weitere Verbindungen werden geschlossen. Nach zwei
+Sekunden ohne Socket-Fortschritt oder spätestens fünf Sekunden Gesamtdauer
+wird eine Verbindung beendet, auch bei langsam nachgelieferten HTTP-Headern.
+Die Statusseite bleibt ohne Anmeldung im privaten Netz nutzbar. Diese Grenzen
+begrenzen den Ressourcenverbrauch; bei Überlast kann die Statusseite samt
+Healthcheck vorübergehend unerreichbar sein.
 Auf PC und NAS nicht gleichzeitig denselben TuyaLink-Gerätezugang betreiben:
 beide Instanzen würden sich wegen identischer MQTT-Geräteidentität verdrängen.
 Beim Umzug das Zustandsvolume mitnehmen, damit ein alter Druck nicht erneut signalisiert wird.
@@ -229,7 +244,7 @@ Stabilisierung, EIN und Rückkehr zu AUS. Er sendet keine Cloud-Befehle.
 [Testumfang und offene Live-Abnahme](docs/tests.md).
 
 Updates: `.env` und Zustandsvolume sichern, dann `docker compose build --pull`
-und `docker compose up -d`. Vor Arbeiten mit möglichem Statuswechsel die zugehörige
+und `docker compose up -d --build --force-recreate`. Vor Arbeiten mit möglichem Statuswechsel die zugehörige
 Smart-Life-Automation deaktivieren. `docker compose down` behält Daten;
 `down -v` würde die Wiederholungssperre löschen und ist kein normaler Update-Schritt.
 

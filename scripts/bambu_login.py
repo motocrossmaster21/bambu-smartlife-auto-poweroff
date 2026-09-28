@@ -470,28 +470,19 @@ def main():
     )
 
 
-if __name__ == "__main__":
+def cli():
     try:
         main()
-
+        return 0
     except KeyboardInterrupt:
-        raise SystemExit(
-            "\nAnmeldung abgebrochen."
-        )
+        print("\nAnmeldung abgebrochen.")
+        return 130
+    except Exception:
+        # Exceptions can contain credentials, URLs or server response bodies.
+        print("\nBambu-Anmeldung fehlgeschlagen. Bitte Netzwerk, Region, "
+              "Anmeldedaten und Schreibrechte fuer .env lokal pruefen.")
+        return 1
 
-    except Exception as ex:
-        print()
-        print(
-            "Bambu-Anmeldung fehlgeschlagen."
-        )
-        print(
-            f"Fehlertyp: "
-            f"{type(ex).__name__}"
-        )
-        print(
-            f"Fehler: "
-            f"{ex}"
-        )
-        print()
 
-        raise
+if __name__ == "__main__":
+    raise SystemExit(cli())

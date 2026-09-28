@@ -5,6 +5,14 @@ Das Home-Assistant-Archiv wird nicht gestartet oder in das Image eingebaut.
 
 ## Automatisierte Prüfungen
 
+Sicherheitsergänzung am 28.09.2026: 56 Tests bestanden und Compose-Konfiguration
+validiert. Die zusätzlichen Tests verwenden echte lokale TCP-Verbindungen:
+inaktive Clients, langsam nachgelieferte Header, Ablehnung überzähliger
+Verbindungen und erfolgreiche Statusabfragen nach Freigabe der Kapazität.
+Auch ein Fehler beim Thread-Start sowie bereinigte Login-Fehlerausgaben werden
+geprüft. Die neuen Container-Ressourcenlimits sind konfiguriert; ihre Durchsetzung
+auf dem QNAP und ein erneuter Container-Smoke-Test sind noch zu prüfen.
+
 Lokal am 27.09.2026: 49 Tests bestanden, Compose validiert und Docker-Image
 erfolgreich gebaut. Der Demo-Container startet ohne Zugangsdaten und meldet
 einen gesunden Zustand. Der HTTP-Smoke-Test ist ebenfalls bestanden: 30 Sekunden

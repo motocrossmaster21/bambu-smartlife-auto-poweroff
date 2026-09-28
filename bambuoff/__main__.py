@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import signal
+import socket
 import threading
 import time
 
@@ -48,6 +49,62 @@ refresh();setInterval(refresh,1000)</script></html>"""
 class Status:
     snapshot = {}
     updated = 0
+
+
+class StatusServer(ThreadingHTTPServer):
+    """Bound workers and connection lifetime, including trickled HTTP headers."""
+
+    max_connections = 8
+    request_queue_size = 8
+    idle_timeout = 2
+    connection_lifetime = 5
+
+    def __init__(self, *args, **kwargs):
+        self.slots = threading.BoundedSemaphore(self.max_connections)
+        super().__init__(*args, **kwargs)
+
+    def process_request(self, request, client_address):
+        # Never block the accept loop or create a waiting worker when full.
+        if not self.slots.acquire(blocking=False):
+            self.shutdown_request(request)
+            return
+        try:
+            request.settimeout(self.idle_timeout)
+            super().process_request(request, client_address)
+        except Exception:
+            self.slots.release()
+            raise
+
+    @staticmethod
+    def expire_connection(request):
+        # shutdown interrupts a blocked read/write; the worker owns close().
+        try:
+            request.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
+
+    def process_request_thread(self, request, client_address):
+        deadline = threading.Timer(self.connection_lifetime, self.expire_connection,
+                                   args=(request,))
+        deadline.daemon = True
+        try:
+            deadline.start()
+            self.finish_request(request, client_address)
+        except OSError:
+            # Timeouts, expired connections and clients disconnecting are normal.
+            pass
+        except Exception:
+            self.handle_error(request, client_address)
+        finally:
+            deadline.cancel()
+            if deadline.ident is not None:
+                deadline.join()
+            self.shutdown_request(request)
+            self.slots.release()
+
+    def handle_error(self, request, client_address):
+        # Do not print client input or exception payloads to container logs.
+        logging.error("HTTP request failed")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -104,7 +161,7 @@ def main():
     for signum in (signal.SIGINT, signal.SIGTERM):
         signal.signal(signum, lambda *_: stop.set())
     # Native Python binds to loopback; Docker sets HTTP_BIND explicitly below.
-    server = ThreadingHTTPServer((os.environ.get("HTTP_BIND", "127.0.0.1"), 8080), Handler)
+    server = StatusServer((os.environ.get("HTTP_BIND", "127.0.0.1"), 8080), Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     start, previous = time.monotonic(), None
     logging.info("BambuOff started in %s mode", config.mode)
