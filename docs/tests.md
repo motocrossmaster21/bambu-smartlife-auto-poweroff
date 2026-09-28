@@ -48,7 +48,7 @@ MQTT-Schnittstellen. Abgedeckt sind insbesondere:
 python -m pip install -r requirements-test.txt
 python -m unittest discover -s tests -v
 docker compose --env-file .env.example config --quiet
-docker compose --env-file .env.example up -d --build
+docker compose -f compose.yaml -f compose.build.yaml --env-file .env.example up -d --build
 python scripts/smoke_demo.py
 ```
 

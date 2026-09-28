@@ -20,10 +20,10 @@ Docker Desktop öffnen. In PowerShell:
 
 ```powershell
 cd C:\Projects\bambu-smartlife-auto-poweroff
-docker compose --env-file .env.example up -d --build
+docker compose --env-file .env.example up -d
 ```
 
-Dann **[http://localhost:8080](http://localhost:8080)** öffnen.
+Dann **[http://localhost:8089](http://localhost:8089)** öffnen.
 
 Das ist absichtlich **Demo-Modus**: simulierte Druckdaten, keine Cloud-Anmeldung,
 keine echten Smart-Life-Auslöser. Ein Zyklus dauert standardmäßig 85 Sekunden:
@@ -53,6 +53,7 @@ python -m pip install -r requirements.txt
 python -m bambuoff
 ```
 
+Ohne Docker ist die Statusseite unter `http://localhost:8080` erreichbar.
 Python liest `.env` nicht automatisch. Ohne gesetzte Prozessvariablen startet es
 im Demo-Modus. Docker Compose übernimmt `.env` automatisch beim normalen Start.
 
@@ -87,7 +88,7 @@ im Demo-Modus. Docker Compose übernimmt `.env` automatisch beim normalen Start.
 4. Normal mit deiner lokalen `.env` starten:
 
    ```powershell
-   docker compose up -d --build --force-recreate
+   docker compose up -d --force-recreate
    ```
 
 5. In Smart Life zunächst eine harmlose Testaktion konfigurieren und den
@@ -112,7 +113,7 @@ flowchart LR
 Kein Home Assistant, MQTT-Broker, Datenbankserver oder Webframework erforderlich.
 Einzige Python-Laufzeitabhängigkeit: `paho-mqtt`. Das Image basiert auf
 `python:3.13-slim` und läuft mit einem Benutzer ohne Root-Rechte. Es benötigt
-nur ausgehende TLS-Verbindungen. Port 8080 ist standardmäßig an PC-Loopback gebunden.
+nur ausgehende TLS-Verbindungen. Host-Port 8089 ist standardmäßig an PC-Loopback gebunden.
 
 Die früher gewünschten HA-Integrationen brauchen die HA-Laufzeit. Für den jetzt
 gewünschten kleinen Statusdienst gibt es stattdessen zwei schmale Adapter:
@@ -192,7 +193,7 @@ Alle Zugangsdaten werden über `.env` und Compose-ENV übergeben.
 | `STABLE_SECONDS` | 30, konfigurierbar 30–3600 |
 | `PULSE_SECONDS` | 30 Sekunden EIN-Impuls, konfigurierbar 1–120 |
 | `MAX_DATA_AGE_SECONDS` | Maximales Alter der Düsen-Isttemperatur und maximale Sendepause: 60 s, konfigurierbar 5–120 |
-| `BIND_IP` / `PORT` | Statusseite, Standard `127.0.0.1:8080` |
+| `BIND_IP` / `PORT` | Statusseite, Standard `127.0.0.1:8089` |
 
 Es gibt keinen Freigabe-Helper und keine Steckdosen-Entity mehr. Die Freigabe
 erfolgt durch Aktivieren/Deaktivieren deiner Automation in Smart Life. Die
@@ -201,19 +202,33 @@ keine Credentials. Nicht löschen, um einen alten Druck erneut auszulösen.
 
 ## QNAP
 
-Projektordner mit `Dockerfile`, `requirements.txt`, `bambuoff/`, `compose.yaml`
-und deiner privaten `.env` auf das NAS übertragen. Container Station mit
-Compose-Build-Unterstützung beziehungsweise Docker Compose v2 verwenden:
+`compose.yaml` und deine private `.env` auf das NAS übertragen. Compose lädt
+das Image `joel85/bambu-turn-off-safe:v0.0.1` von Docker Hub; ein lokaler Build
+ist nicht erforderlich. Das Image unterstützt `linux/amd64`. Mit Compose v2 starten:
 
 ```sh
-docker compose up -d --build
+docker compose up -d
 ```
 
-Nach Änderungen an Code oder Konfiguration das Image neu bauen und den Container
-explizit neu erstellen:
+Nach Änderungen an der Konfiguration den Container neu erstellen:
 
 ```sh
-docker compose up -d --build --force-recreate
+docker compose up -d --force-recreate
+```
+
+In `.env` setzt du `PORT=8089` und für LAN-Zugriff `BIND_IP=<LAN-IP-des-NAS>`.
+Die Statusseite ist dann unter `http://<LAN-IP-des-NAS>:8089` erreichbar.
+In Container Station unter **Default Web URL Port** den Service `bambuoff` und
+den internen Container-Port `8080` eintragen. Diese Einstellung erstellt nur
+den Web-Link; die Portfreigabe erfolgt über Compose. Beim reinen YAML-Import
+wird die `.env` auf deinem PC nicht mitübertragen. Die Variablen müssen beim
+Auswerten der YAML auf dem NAS verfügbar sein; alternativ die `${...}`-Ausdrücke
+in der privaten NAS-Kopie durch konkrete Werte ersetzen.
+
+Für einen Build aus dem lokalen Quellcode zusätzlich `compose.build.yaml` verwenden:
+
+```sh
+docker compose -f compose.yaml -f compose.build.yaml up -d --build --force-recreate
 ```
 
 `BIND_IP` bei Bedarf auf die LAN-IP des NAS setzen. Keine WAN-Portfreigabe nötig.
@@ -243,8 +258,9 @@ Der letzte Befehl prüft einen laufenden **Demo**-Container über HTTP inklusive
 Stabilisierung, EIN und Rückkehr zu AUS. Er sendet keine Cloud-Befehle.
 [Testumfang und offene Live-Abnahme](docs/tests.md).
 
-Updates: `.env` und Zustandsvolume sichern, dann `docker compose build --pull`
-und `docker compose up -d --build --force-recreate`. Vor Arbeiten mit möglichem Statuswechsel die zugehörige
+Updates: `.env` und Zustandsvolume sichern, den gewünschten Image-Tag in
+`compose.yaml` setzen, dann `docker compose pull` und
+`docker compose up -d --force-recreate` ausführen. Vor Arbeiten mit möglichem Statuswechsel die zugehörige
 Smart-Life-Automation deaktivieren. `docker compose down` behält Daten;
 `down -v` würde die Wiederholungssperre löschen und ist kein normaler Update-Schritt.
 

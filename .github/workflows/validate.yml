@@ -6,6 +6,8 @@ jobs:
   validate:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    env:
+      COMPOSE_FILE: compose.yaml:compose.build.yaml
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

@@ -2,8 +2,9 @@
 name: bambuoff
 services:
   bambuoff:
-    build: .
-    image: bambuoff:local
+    # build: .
+    # image: bambuoff:local
+    image: joel85/bambu-turn-off-safe:v0.0.1
     restart: unless-stopped
     environment:
       MODE: ${MODE:-demo}

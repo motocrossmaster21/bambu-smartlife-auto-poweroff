@@ -1,0 +1,5 @@
+# Optional local source build: docker compose -f compose.yaml -f compose.build.yaml up -d --build --force-recreate
+services:
+  bambuoff:
+    build: .
+    image: bambuoff:local
